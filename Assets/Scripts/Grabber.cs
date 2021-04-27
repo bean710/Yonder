@@ -13,6 +13,7 @@ public class Grabber : MonoBehaviour
 
     public GameObject stickyNote;
     public Transform stickyPos;
+    public GameObject window;
     public LeftOrRight leftOrRight = LeftOrRight.Left;
 
     private GameObject holding = null;
@@ -20,6 +21,7 @@ public class Grabber : MonoBehaviour
     private bool touchingStack = false;
 
     private OVRInput.Controller controller;
+    private Collider windowCollider;
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +31,8 @@ public class Grabber : MonoBehaviour
             controller = OVRInput.Controller.LTouch;
         else
             controller = OVRInput.Controller.RTouch;
+
+        windowCollider = window.GetComponent<Collider>();
     }
 
     // Update is called once per frame
@@ -38,15 +42,22 @@ public class Grabber : MonoBehaviour
 
         if (holding == null && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller))
         {
-            QuestDebug.Instance.Log($"Grabbing with { (leftOrRight == LeftOrRight.Left ? "Left" : "Right") }");
-            if (touchingStack && holding == null)
+            if (touchingStack)
                 holding = Instantiate(stickyNote, stickyPos);
         }
 
         if (holding != null && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller) == false)
         {
             StickyNote sticky = holding.GetComponent<StickyNote>();
-            sticky.Drop();
+            Vector3 closest = windowCollider.ClosestPoint(holding.transform.position);
+            float dist = Vector3.Distance(closest, holding.transform.position);
+
+            QuestDebug.Instance.Log($"Dist: {dist}");
+
+            if (dist < 0.5f)
+                sticky.Stick(window, closest);
+            else
+                sticky.Drop();
 
             holding = null;
         }
@@ -60,7 +71,6 @@ public class Grabber : MonoBehaviour
     {
         if (other.gameObject.tag == "StickyStack")
         {
-            QuestDebug.Instance.Log($"Collided with a {other.gameObject.tag}");
             touchingStack = true;
         }
     }

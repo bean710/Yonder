@@ -2,17 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WindowManager : MonoBehaviour
+public static class WindowManager
 {
-    // Start is called before the first frame update
-    void Start()
+    public static void addItem(GameObject gameObject)
     {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
