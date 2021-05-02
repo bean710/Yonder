@@ -5,9 +5,10 @@ using NativeWebSocket;
 
 public class ServerManager : MonoBehaviour
 {
-    private WebSocket webSocket;
+    public List<ForeignWindow> foreignWindows;
+    public float pingFrequency = 5f; // Minutes; 10 minutes is timeout
 
-    private float pingFrequency = 5f; // Minutes; 10 minutes is timeout
+    private WebSocket webSocket;
 
     // Start is called before the first frame update
     async void Start()
@@ -39,12 +40,16 @@ public class ServerManager : MonoBehaviour
 
                 foreach (CompleteDataResult.ForeignWindowData foreignWindow in foreignWindowData.data)
                 {
-                    Debug.Log($"Owner ID: {foreignWindow.ownerId}");
                     Debug.Log($"Apartment ID: {foreignWindow.apartmentId}");
-                    Debug.Log($"Data: {foreignWindow.data}");
 
-                    Debug.Log($"Color: {foreignWindow.data.stickyNotes[0].color}");
+                    foreignWindows[0].AddData(foreignWindow);
                 }
+            }
+            else if (message.type == "addStickyNote")
+            {
+                QuestDebug.Instance.Log("Getting new sticky info");
+                AddStickyNoteResult stickyNoteData = JsonUtility.FromJson<AddStickyNoteResult>(bytesData);
+                foreignWindows[0].AddStickyNoteFromData(stickyNoteData.data);
             }
         };
 
@@ -65,6 +70,23 @@ public class ServerManager : MonoBehaviour
         {
             Debug.Log("Getting foreign window data");
             await webSocket.SendText("{'action' : 'getData'}");
+        }
+    }
+
+    public async void AddStickyNote(StickyNote stickyNote)
+    {
+        if (webSocket.State == WebSocketState.Open)
+        {
+            StickyNoteData stickyNoteData = new StickyNoteData(stickyNote);
+            string serializedStickyNoteData = JsonUtility.ToJson(stickyNoteData);
+
+            QuestDebug.Instance.Log("Sending add message");
+
+            await webSocket.SendText("{\"action\" : \"addStickyNote\", \"apartmentId\" : \"0#0\", \"stickyNoteData\" : " + serializedStickyNoteData + "}");
+        }
+        else
+        {
+            QuestDebug.Instance.Log("No Socket Connection");
         }
     }
 
@@ -90,34 +112,45 @@ public class WebSocketMessage
 }
 
 [System.Serializable]
+public class StickyNoteData
+{
+    public StickyNoteData(StickyNote stickyNote)
+    {
+        this.position = new StickyNotePos(stickyNote.transform.localPosition);
+        this.color = stickyNote.color;
+    }
+
+    [System.Serializable]
+    public class StickyNotePos
+    {
+        public StickyNotePos(Vector3 position)
+        {
+            this.x = position.x;
+            this.y = position.y;
+            this.z = position.z;
+        }
+
+        public float x, y, z;
+    }
+
+    public StickyNotePos position;
+    public string color;
+}
+
+[System.Serializable]
 public class CompleteDataResult
 {
     [System.Serializable]
     public class ForeignWindowData
     {
-        [System.Serializable]
-        public class ForeignWindowObjectData
-        {
-            [System.Serializable]
-            public class StickyNoteData
-            {
-                [System.Serializable]
-                public class StickyNotePos
-                {
-                    public int x, y, z;
-                }
-
-                public StickyNotePos position;
-                public string color;
-            }
-
-            public List<StickyNoteData> stickyNotes;
-        }
-
         public string apartmentId;
-        public string ownerId;
-        public ForeignWindowObjectData data;
+        public List<StickyNoteData> stickyNotes;
     }
 
     public List<ForeignWindowData> data;
+}
+
+public class AddStickyNoteResult
+{
+    public StickyNoteData data;
 }

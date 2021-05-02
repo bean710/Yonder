@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class WindowManager
+public class WindowManager : MonoBehaviour
 {
-    public static void addItem(GameObject gameObject)
-    {
+    public ServerManager serverManager;
 
+    private List<GameObject> items = new List<GameObject>();
+
+    public void addItem(GameObject gameObject)
+    {
+        items.Add(gameObject);
+        serverManager.AddStickyNote(gameObject.GetComponent<StickyNote>());
     }
 }

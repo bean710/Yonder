@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class StickyNote : MonoBehaviour
 {
@@ -8,11 +9,40 @@ public class StickyNote : MonoBehaviour
     private Rigidbody m_Rigidbody;
     private bool stuck = false;
 
+    public string color = "red";
+    public bool isOwnSticky = true;
+    public string id = "";
+
+    public Material red;
+    public Material blue;
+    public Material yellow;
+
     // Start is called before the first frame update
     void Start()
     {
         m_Collider = GetComponent<Collider>();
         m_Rigidbody = GetComponent<Rigidbody>();
+
+        if (id == "")
+            id = Guid.NewGuid().ToString();
+
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+
+        switch (color)
+        {
+            case "red":
+                meshRenderer.material = red;
+                break;
+            case "blue":
+                meshRenderer.material = blue;
+                break;
+            case "yellow":
+                meshRenderer.material = yellow;
+                break;
+            default:
+                meshRenderer.material = yellow;
+                break;
+        }
     }
 
     // Update is called once per frame
@@ -31,11 +61,24 @@ public class StickyNote : MonoBehaviour
         stuck = false;
     }
 
-    public void Stick(GameObject gameObject, Vector3 closestPosition)
+    public void Stick(GameObject stuckTo, Vector3 closestPosition)
     {
         QuestDebug.Instance.Log($"Sticking");
-        transform.SetParent(gameObject.transform, true);
+        transform.SetParent(stuckTo.transform, true);
         transform.position = closestPosition;
         stuck = true;
+
+        if (isOwnSticky)
+        {
+            WindowManager windowManager = stuckTo.GetComponent<WindowManager>();
+            if (windowManager != null)
+            {
+                windowManager.addItem(gameObject);
+            }
+            else
+            {
+                QuestDebug.Instance.Log("No window manager found");
+            }
+        }
     }
 }
