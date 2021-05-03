@@ -51,6 +51,15 @@ public class ServerManager : MonoBehaviour
                 AddStickyNoteResult stickyNoteData = JsonUtility.FromJson<AddStickyNoteResult>(bytesData);
                 foreignWindows[0].AddStickyNoteFromData(stickyNoteData.data);
             }
+            else if (message.type == "removeStickyNote")
+            {
+                QuestDebug.Instance.Log("Removing foreign sticky note");
+                RemoveStickyNoteResult removeStickyNoteData = JsonUtility.FromJson<RemoveStickyNoteResult>(bytesData);
+                Debug.Log(removeStickyNoteData);
+                Debug.Log(removeStickyNoteData.data);
+                Debug.Log(removeStickyNoteData.data.stickyNoteId);
+                foreignWindows[0].RemoveStickyNoteFromData(removeStickyNoteData.data);
+            }
         };
 
         await webSocket.Connect();
@@ -90,6 +99,20 @@ public class ServerManager : MonoBehaviour
         }
     }
 
+    public async void RemoveStickyNote(StickyNote stickyNote)
+    {
+        if (webSocket.State == WebSocketState.Open)
+        {
+            QuestDebug.Instance.Log("Sending remove message");
+
+            await webSocket.SendText("{\"action\" : \"removeStickyNote\", \"apartmentId\" : \"0#0\", \"stickyNoteId\" : \"" + stickyNote.id + "\"}");
+        }
+        else
+        {
+            QuestDebug.Instance.Log("No Socket Connection");
+        }
+    }
+
     async void SendWebSocketPing()
     {
         if (webSocket.State == WebSocketState.Open)
@@ -118,6 +141,7 @@ public class StickyNoteData
     {
         this.position = new StickyNotePos(stickyNote.transform.localPosition);
         this.color = stickyNote.color;
+        this.id = stickyNote.id;
     }
 
     [System.Serializable]
@@ -134,6 +158,7 @@ public class StickyNoteData
     }
 
     public StickyNotePos position;
+    public string id;
     public string color;
 }
 
@@ -150,7 +175,21 @@ public class CompleteDataResult
     public List<ForeignWindowData> data;
 }
 
+[System.Serializable]
 public class AddStickyNoteResult
 {
     public StickyNoteData data;
+}
+
+[System.Serializable]
+public class RemoveStickyNoteResult
+{
+    [System.Serializable]
+    public class RemoveStickyNoteData
+    {
+        public string apartmentId;
+        public string stickyNoteId;
+    }
+
+    public RemoveStickyNoteData data;
 }

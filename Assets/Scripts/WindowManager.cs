@@ -13,4 +13,10 @@ public class WindowManager : MonoBehaviour
         items.Add(gameObject);
         serverManager.AddStickyNote(gameObject.GetComponent<StickyNote>());
     }
+
+    public void removeItem(GameObject item)
+    {
+        serverManager.RemoveStickyNote(item.GetComponent<StickyNote>());
+        items.Remove(item);
+    }
 }

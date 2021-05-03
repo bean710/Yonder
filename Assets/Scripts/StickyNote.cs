@@ -8,6 +8,7 @@ public class StickyNote : MonoBehaviour
     private Collider m_Collider;
     private Rigidbody m_Rigidbody;
     private bool stuck = false;
+    private WindowManager windowManager;
 
     public string color = "Red";
     public bool isOwnSticky = true;
@@ -43,6 +44,9 @@ public class StickyNote : MonoBehaviour
                 meshRenderer.material = Yellow;
                 break;
         }
+
+        if (isOwnSticky)
+            windowManager = FindObjectOfType<WindowManager>();
     }
 
     // Update is called once per frame
@@ -69,16 +73,17 @@ public class StickyNote : MonoBehaviour
         stuck = true;
 
         if (isOwnSticky)
-        {
-            WindowManager windowManager = stuckTo.GetComponent<WindowManager>();
-            if (windowManager != null)
-            {
-                windowManager.addItem(gameObject);
-            }
-            else
-            {
-                QuestDebug.Instance.Log("No window manager found");
-            }
-        }
+            windowManager.addItem(gameObject);
+    }
+
+    public void PickUp()
+    {
+        m_Rigidbody.isKinematic = true;
+        m_Rigidbody.useGravity = false;
+
+        if (stuck)
+            windowManager.removeItem(gameObject);
+
+        stuck = false;
     }
 }

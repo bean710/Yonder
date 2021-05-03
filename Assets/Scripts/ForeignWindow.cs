@@ -45,7 +45,20 @@ public class ForeignWindow : MonoBehaviour
         StickyNote stickyNote = newStickyNote.GetComponent<StickyNote>();
         stickyNote.isOwnSticky = false;
         stickyNote.color = stickyNoteData.color;
-        
+        stickyNote.id = stickyNoteData.id;
+
         AddNote(stickyNote);
+    }
+
+    public void RemoveStickyNoteFromData(RemoveStickyNoteResult.RemoveStickyNoteData stickyNoteData)
+    {
+        foreach (StickyNote stickyNote in notes)
+        {
+            if (stickyNote.id == stickyNoteData.stickyNoteId)
+            {
+                notes.Remove(stickyNote);
+                Destroy(stickyNote.gameObject);
+            }
+        }
     }
 }
