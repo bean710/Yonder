@@ -18,7 +18,7 @@ public class Grabber : MonoBehaviour
 
     private GameObject holding = null;
 
-    private bool touchingStack = false;
+    private StickyStack touchingStack = null;
 
     private OVRInput.Controller controller;
     private Collider windowCollider;
@@ -42,8 +42,12 @@ public class Grabber : MonoBehaviour
 
         if (holding == null && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller))
         {
-            if (touchingStack)
+            if (touchingStack != null)
+            {
                 holding = Instantiate(stickyNote, stickyPos);
+                StickyNote newStickyNote = holding.GetComponent<StickyNote>();
+                newStickyNote.color = touchingStack.color.ToString();
+            }
         }
 
         if (holding != null && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller) == false)
@@ -71,13 +75,13 @@ public class Grabber : MonoBehaviour
     {
         if (other.gameObject.tag == "StickyStack")
         {
-            touchingStack = true;
+            touchingStack = other.gameObject.GetComponent<StickyStack>();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject.tag == "StickyStack")
-            touchingStack = false;
+            touchingStack = null;
     }
 }

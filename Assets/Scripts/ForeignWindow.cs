@@ -44,6 +44,8 @@ public class ForeignWindow : MonoBehaviour
 
         StickyNote stickyNote = newStickyNote.GetComponent<StickyNote>();
         stickyNote.isOwnSticky = false;
+        stickyNote.color = stickyNoteData.color;
+        
         AddNote(stickyNote);
     }
 }

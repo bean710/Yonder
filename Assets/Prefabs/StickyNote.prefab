@@ -109,12 +109,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ca3de7a66d392e49aa3652df424fa36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: red
+  color: Red
   isOwnSticky: 1
   id: 
-  red: {fileID: 2100000, guid: 3f19652386f3ae84889bc4a6af4b6d11, type: 2}
-  blue: {fileID: 2100000, guid: 8ebb9a584e459974591430ec87298fff, type: 2}
-  yellow: {fileID: 2100000, guid: e8c3d34824b505448a54e38bb5bce449, type: 2}
+  Red: {fileID: 2100000, guid: 3f19652386f3ae84889bc4a6af4b6d11, type: 2}
+  Blue: {fileID: 2100000, guid: 8ebb9a584e459974591430ec87298fff, type: 2}
+  Yellow: {fileID: 2100000, guid: e8c3d34824b505448a54e38bb5bce449, type: 2}
 --- !u!54 &4400477350198183971
 Rigidbody:
   m_ObjectHideFlags: 0

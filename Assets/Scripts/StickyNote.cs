@@ -9,13 +9,13 @@ public class StickyNote : MonoBehaviour
     private Rigidbody m_Rigidbody;
     private bool stuck = false;
 
-    public string color = "red";
+    public string color = "Red";
     public bool isOwnSticky = true;
     public string id = "";
 
-    public Material red;
-    public Material blue;
-    public Material yellow;
+    public Material Red;
+    public Material Blue;
+    public Material Yellow;
 
     // Start is called before the first frame update
     void Start()
@@ -30,17 +30,17 @@ public class StickyNote : MonoBehaviour
 
         switch (color)
         {
-            case "red":
-                meshRenderer.material = red;
+            case "Red":
+                meshRenderer.material = Red;
                 break;
-            case "blue":
-                meshRenderer.material = blue;
+            case "Blue":
+                meshRenderer.material = Blue;
                 break;
-            case "yellow":
-                meshRenderer.material = yellow;
+            case "Yellow":
+                meshRenderer.material = Yellow;
                 break;
             default:
-                meshRenderer.material = yellow;
+                meshRenderer.material = Yellow;
                 break;
         }
     }
