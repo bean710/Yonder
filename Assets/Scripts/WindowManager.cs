@@ -42,7 +42,7 @@ public class WindowManager : MonoBehaviour
         
         Vector3 stickyPos = new Vector3(stickyNoteData.position.x, stickyNoteData.position.y, stickyNoteData.position.z);
         newStickyNote.transform.localPosition = stickyPos;
-        newStickyNote.transform.Rotate(0f, 0f, 90f);
+        newStickyNote.transform.Rotate(0f, 0f, -90f);
         newStickyNote.transform.Rotate(stickyNoteData.position.rotation, 0f, 0f);
 
         StickyNote stickyNote = newStickyNote.GetComponent<StickyNote>();
