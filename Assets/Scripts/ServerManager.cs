@@ -155,7 +155,7 @@ public class StickyNoteData
 {
     public StickyNoteData(StickyNote stickyNote)
     {
-        this.position = new StickyNotePos(stickyNote.transform.localPosition);
+        this.position = new StickyNotePos(stickyNote.transform.localPosition, stickyNote.transform.eulerAngles.x);
         this.color = stickyNote.color;
         this.id = stickyNote.id;
     }
@@ -163,14 +163,16 @@ public class StickyNoteData
     [System.Serializable]
     public class StickyNotePos
     {
-        public StickyNotePos(Vector3 position)
+        public StickyNotePos(Vector3 position, float rotation = 0f)
         {
             this.x = position.x;
             this.y = position.y;
             this.z = position.z;
+            this.rotation = rotation;
         }
 
         public float x, y, z;
+        public float rotation;
     }
 
     public StickyNotePos position;
