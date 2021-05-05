@@ -70,6 +70,8 @@ public class StickyNote : MonoBehaviour
         QuestDebug.Instance.Log($"Sticking");
         transform.SetParent(stuckTo.transform, true);
         transform.position = closestPosition;
+        Vector3 originalAngles = transform.rotation.eulerAngles;
+        transform.rotation = Quaternion.Euler(originalAngles.x, 0, -90);
         stuck = true;
 
         if (!loadedNote && isOwnSticky)
