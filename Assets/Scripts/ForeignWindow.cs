@@ -5,13 +5,19 @@ using UnityEngine;
 public class ForeignWindow : MonoBehaviour
 {
     public GameObject stickyNotePrefab;
+    public GameObject backDrop;
+
+    public Material offline;
+    public Material online;
 
     List<StickyNote> notes = new List<StickyNote>();
+
+    private Renderer backDropRenderer = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        backDropRenderer = backDrop.GetComponent<Renderer>();
     }
 
     // Update is called once per frame
@@ -28,6 +34,8 @@ public class ForeignWindow : MonoBehaviour
 
     public void AddData(CompleteDataResult.ForeignWindowData foreignWindowData)
     {
+        SetOnlineStatus(foreignWindowData.onlineStatus);
+
         foreach (StickyNoteData stickyNoteData in foreignWindowData.stickyNotes)
         {
             AddStickyNoteFromData(stickyNoteData);
@@ -51,15 +59,20 @@ public class ForeignWindow : MonoBehaviour
         AddNote(stickyNote);
     }
 
-    public void RemoveStickyNoteFromData(RemoveStickyNoteResult.RemoveStickyNoteData stickyNoteData)
+    public void RemoveStickyNoteFromData(string stickyNoteId)
     {
-        foreach (StickyNote stickyNote in notes)
+        StickyNote noteToRemove = notes.Find((note) => note.id == stickyNoteId);
+
+        if (noteToRemove)
         {
-            if (stickyNote.id == stickyNoteData.stickyNoteId)
-            {
-                notes.Remove(stickyNote);
-                Destroy(stickyNote.gameObject);
-            }
+            notes.Remove(noteToRemove);
+            Destroy(noteToRemove.gameObject);
         }
+    }
+
+    public void SetOnlineStatus(bool onlineStatus)
+    {
+        if (backDropRenderer != null)
+            backDropRenderer.material = onlineStatus ? online : offline;
     }
 }

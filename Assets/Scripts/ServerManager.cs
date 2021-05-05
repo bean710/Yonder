@@ -65,7 +65,7 @@ public class ServerManager : MonoBehaviour
                 RemoveStickyNoteResult removeStickyNoteData = JsonUtility.FromJson<RemoveStickyNoteResult>(bytesData);
 
                 if (foreignWindowsMap.ContainsKey(removeStickyNoteData.apartmentId))
-                    foreignWindowsMap[removeStickyNoteData.apartmentId].RemoveStickyNoteFromData(removeStickyNoteData.data);
+                    foreignWindowsMap[removeStickyNoteData.apartmentId].RemoveStickyNoteFromData(removeStickyNoteData.stickyNoteId);
             }
             else if (message.type == "localWindowData")
             {
@@ -75,6 +75,14 @@ public class ServerManager : MonoBehaviour
 
                 if (localWindowResult.data != null)
                     localWindow.AddData(localWindowResult.data);
+            }
+            else if (message.type == "setOnlineStatus")
+            {
+                SetOnlineResult setOnlineResult = JsonUtility.FromJson<SetOnlineResult>(bytesData);
+                Debug.Log($"Setting online to: {setOnlineResult.onlineStatus} of apartment {setOnlineResult.apartmentId}");
+
+                if (foreignWindowsMap.ContainsKey(setOnlineResult.apartmentId))
+                    foreignWindowsMap[setOnlineResult.apartmentId].SetOnlineStatus(setOnlineResult.onlineStatus);
             }
         };
 
@@ -187,6 +195,7 @@ public class CompleteDataResult
     public class ForeignWindowData
     {
         public int apartmentId;
+        public bool onlineStatus;
         public List<StickyNoteData> stickyNotes;
     }
 
@@ -203,14 +212,7 @@ public class AddStickyNoteResult
 [System.Serializable]
 public class RemoveStickyNoteResult
 {
-    [System.Serializable]
-    public class RemoveStickyNoteData
-    {
-        public string apartmentId;
-        public string stickyNoteId;
-    }
-
-    public RemoveStickyNoteData data;
+    public string stickyNoteId;
     public int apartmentId;
 }
 
@@ -225,4 +227,11 @@ public class LocalWindowResult
     }
 
     public LocalWindowData data;
+}
+
+[System.Serializable]
+public class SetOnlineResult
+{
+    public int apartmentId;
+    public bool onlineStatus;
 }
