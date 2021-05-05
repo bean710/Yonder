@@ -65,14 +65,14 @@ public class StickyNote : MonoBehaviour
         stuck = false;
     }
 
-    public void Stick(GameObject stuckTo, Vector3 closestPosition)
+    public void Stick(GameObject stuckTo, Vector3 closestPosition, bool loadedNote = false)
     {
         QuestDebug.Instance.Log($"Sticking");
         transform.SetParent(stuckTo.transform, true);
         transform.position = closestPosition;
         stuck = true;
 
-        if (isOwnSticky)
+        if (!loadedNote && isOwnSticky)
             windowManager.addItem(gameObject);
     }
 

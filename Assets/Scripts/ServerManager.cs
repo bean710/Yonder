@@ -5,10 +5,12 @@ using NativeWebSocket;
 
 public class ServerManager : MonoBehaviour
 {
+    public WindowManager localWindow;
     public List<ForeignWindow> foreignWindows;
     public float pingFrequency = 5f; // Minutes; 10 minutes is timeout
 
     private WebSocket webSocket;
+    private Dictionary<int, ForeignWindow> foreignWindowsMap = new Dictionary<int, ForeignWindow>();
 
     // Start is called before the first frame update
     async void Start()
@@ -37,28 +39,42 @@ public class ServerManager : MonoBehaviour
             if (message.type == "foreignWindowData")
             {
                 CompleteDataResult foreignWindowData = JsonUtility.FromJson<CompleteDataResult>(bytesData);
+                int index = 0;
 
                 foreach (CompleteDataResult.ForeignWindowData foreignWindow in foreignWindowData.data)
                 {
-                    Debug.Log($"Apartment ID: {foreignWindow.apartmentId}");
+                    Debug.Log($"Foreign Apartment ID: {foreignWindow.apartmentId}");
 
-                    foreignWindows[0].AddData(foreignWindow);
+                    foreignWindows[index].AddData(foreignWindow);
+                    foreignWindowsMap.Add(foreignWindow.apartmentId, foreignWindows[index]);
+                    
+                    index++;
                 }
             }
             else if (message.type == "addStickyNote")
             {
                 QuestDebug.Instance.Log("Getting new sticky info");
                 AddStickyNoteResult stickyNoteData = JsonUtility.FromJson<AddStickyNoteResult>(bytesData);
-                foreignWindows[0].AddStickyNoteFromData(stickyNoteData.data);
+
+                if (foreignWindowsMap.ContainsKey(stickyNoteData.apartmentId))
+                    foreignWindowsMap[stickyNoteData.apartmentId].AddStickyNoteFromData(stickyNoteData.data);
             }
             else if (message.type == "removeStickyNote")
             {
                 QuestDebug.Instance.Log("Removing foreign sticky note");
                 RemoveStickyNoteResult removeStickyNoteData = JsonUtility.FromJson<RemoveStickyNoteResult>(bytesData);
-                Debug.Log(removeStickyNoteData);
-                Debug.Log(removeStickyNoteData.data);
-                Debug.Log(removeStickyNoteData.data.stickyNoteId);
-                foreignWindows[0].RemoveStickyNoteFromData(removeStickyNoteData.data);
+
+                if (foreignWindowsMap.ContainsKey(removeStickyNoteData.apartmentId))
+                    foreignWindowsMap[removeStickyNoteData.apartmentId].RemoveStickyNoteFromData(removeStickyNoteData.data);
+            }
+            else if (message.type == "localWindowData")
+            {
+                Debug.Log("Got local window data");
+                LocalWindowResult localWindowResult = JsonUtility.FromJson<LocalWindowResult>(bytesData);
+                Debug.Log(localWindowResult.data);
+
+                if (localWindowResult.data != null)
+                    localWindow.AddData(localWindowResult.data);
             }
         };
 
@@ -78,7 +94,7 @@ public class ServerManager : MonoBehaviour
         if (webSocket.State == WebSocketState.Open)
         {
             Debug.Log("Getting foreign window data");
-            await webSocket.SendText("{'action' : 'getData'}");
+            await webSocket.SendText("{\"action\" : \"getData\", \"deviceId\" : \"" + SystemInfo.deviceUniqueIdentifier + "\"}");
         }
     }
 
@@ -91,7 +107,7 @@ public class ServerManager : MonoBehaviour
 
             QuestDebug.Instance.Log("Sending add message");
 
-            await webSocket.SendText("{\"action\" : \"addStickyNote\", \"apartmentId\" : \"0#0\", \"stickyNoteData\" : " + serializedStickyNoteData + "}");
+            await webSocket.SendText("{\"action\" : \"addStickyNote\", \"deviceId\": \"" + SystemInfo.deviceUniqueIdentifier + "\", \"stickyNoteData\" : " + serializedStickyNoteData + "}");
         }
         else
         {
@@ -105,7 +121,7 @@ public class ServerManager : MonoBehaviour
         {
             QuestDebug.Instance.Log("Sending remove message");
 
-            await webSocket.SendText("{\"action\" : \"removeStickyNote\", \"apartmentId\" : \"0#0\", \"stickyNoteId\" : \"" + stickyNote.id + "\"}");
+            await webSocket.SendText("{\"action\" : \"removeStickyNote\", \"deviceId\": \"" + SystemInfo.deviceUniqueIdentifier + "\", \"stickyNoteId\" : \"" + stickyNote.id + "\"}");
         }
         else
         {
@@ -168,7 +184,7 @@ public class CompleteDataResult
     [System.Serializable]
     public class ForeignWindowData
     {
-        public string apartmentId;
+        public int apartmentId;
         public List<StickyNoteData> stickyNotes;
     }
 
@@ -179,6 +195,7 @@ public class CompleteDataResult
 public class AddStickyNoteResult
 {
     public StickyNoteData data;
+    public int apartmentId;
 }
 
 [System.Serializable]
@@ -192,4 +209,18 @@ public class RemoveStickyNoteResult
     }
 
     public RemoveStickyNoteData data;
+    public int apartmentId;
+}
+
+[System.Serializable]
+public class LocalWindowResult
+{
+    [System.Serializable]
+    public class LocalWindowData
+    {
+        public int apartmentId;
+        public List<StickyNoteData> stickyNotes;
+    }
+
+    public LocalWindowData data;
 }
